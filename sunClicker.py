@@ -65,11 +65,13 @@ def main():
     
     print("Commands: 'p' to pause, 'm' to cycle monitor, 'q' to quit")
     
+    HEADLESS = True  # Set to True to disable the debug window for better performance
     CONFIDENCE_THRESHOLD = 0.75
     CLICK_DELAY = 0.0 
 
-    cv2.namedWindow("PVZ Bot View", cv2.WINDOW_NORMAL)
-    cv2.resizeWindow("PVZ Bot View", 960, 540)
+    if not HEADLESS:
+        cv2.namedWindow("PVZ Bot View", cv2.WINDOW_NORMAL)
+        cv2.resizeWindow("PVZ Bot View", 960, 540)
 
     # Initialize MSS
     # sct initialized above
@@ -132,18 +134,22 @@ def main():
                 else:
                     waiting_for_sun = False
 
-            # Show the debug window
-            display_frame = cv2.resize(frame_bgr, (0, 0), fx=0.5, fy=0.5)
-            cv2.imshow("PVZ Bot View", display_frame)
-            
-            # Check OpenCV window key (backup for 'q')
-            if cv2.waitKey(1) & 0xFF == ord('q'):
-                break
+            # Show the debug window if not headless
+            if not HEADLESS:
+                display_frame = cv2.resize(frame_bgr, (0, 0), fx=0.5, fy=0.5)
+                cv2.imshow("PVZ Bot View", display_frame)
+                
+                # Check OpenCV window key (backup for 'q')
+                # If headless, we rely solely on keyboard.add_hotkey('q', ...)
+                if cv2.waitKey(1) & 0xFF == ord('q'):
+                    break
                 
     finally:
         keyboard.unhook_all_hotkeys()
-        cv2.destroyAllWindows()
-        print("Cleaned up windows.")
+        if not HEADLESS:
+            cv2.destroyAllWindows()
+            print("Cleaned up windows.")
+        print("Shutdown complete.")
 
 if __name__ == "__main__":
     main()
