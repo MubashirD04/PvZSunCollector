@@ -34,6 +34,7 @@ A Python-based autoclicker for Plants vs. Zombies that automatically detects and
 3.  **Controls**:
     - `p`: **Pause/Resume** the autoclicker.
     - `m`: **Cycle Monitor** (if you have multiple screens and the game is on a secondary one).
+    - `d`: **Toggle Debug View** (show/hide computer vision output).
     - `q`: **Quit** the program.
 
 ## Troubleshooting

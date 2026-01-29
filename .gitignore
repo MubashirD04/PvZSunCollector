@@ -3,3 +3,9 @@ __pycache__/
 .venv/
 .vscode/
 .idea/
+dist/
+build/
+build.bat
+sunClicker.exe
+sunClicker.spec
+Archive/
