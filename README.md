@@ -1,6 +1,7 @@
 # PVZ Sun Autoclicker
 
 A Python-based autoclicker for Plants vs. Zombies that automatically detects and collects suns using computer vision.
+Built with Googles Antigravity.
 
 https://github.com/user-attachments/assets/e37dbdec-80d1-43a4-86ab-f27df42e61fc
 
