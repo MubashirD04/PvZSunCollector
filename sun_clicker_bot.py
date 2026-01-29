@@ -11,7 +11,6 @@ import sys
 from collections import deque
 
 def resource_path(relative_path):
-    """ Get absolute path to resource, works for dev and for PyInstaller """
     try:
         # PyInstaller creates a temp folder and stores path in _MEIPASS
         base_path = sys._MEIPASS
@@ -34,31 +33,24 @@ class SunClickerBot:
         # Multiple templates support
         self.templates = []  # List of template dicts
         
-        # OPTIMIZATION: Performance settings
         self.click_cooldown = 0.05
         self.last_click_time = 0
         self.click_positions = deque(maxlen=10)
         self.duplicate_threshold = 30
         
-        # OPTIMIZATION: Frame skipping for better performance
         self.frame_skip = 2  # Process every 2nd frame
         self.frame_counter = 0
         
-        # OPTIMIZATION: Downscale factor for faster processing
         self.downscale_factor = 0.75  # Process at 75% size, 44% faster
         
-        # OPTIMIZATION: Early exit after first match
         self.early_exit = True
         
-        # OPTIMIZATION: ROI (Region of Interest) - define game area
         self.use_roi = False
         self.roi = None  # (x, y, w, h) - set this to game window area if known
         
-        # OPTIMIZATION: Parallel processing
         self.use_parallel = True
         self.thread_pool = ThreadPoolExecutor(max_workers=3)
         
-        # Multi-scale detection
         self.use_multiscale = False
         self.scales = [1.0]
         
@@ -72,7 +64,6 @@ class SunClickerBot:
         self.load_templates()
 
     def load_templates(self):
-        """Load all sun template images and preprocess them"""
         patterns = [
             'sun.png',
             'sun*.png',
@@ -141,7 +132,7 @@ class SunClickerBot:
             print(f"  - Parallel processing: {self.use_parallel}")
 
     def match_template_worker(self, frame_gray, template_info):
-        """Worker function for parallel template matching"""
+        #Worker function for parallel template matching
         try:
             result = cv2.matchTemplate(frame_gray, template_info['gray'], cv2.TM_CCOEFF_NORMED)
             min_val, max_val, min_loc, max_loc = cv2.minMaxLoc(result)
@@ -228,7 +219,6 @@ class SunClickerBot:
                         time.sleep(1)
                         continue
 
-                    # OPTIMIZATION: Frame skipping
                     self.frame_counter += 1
                     if self.frame_counter % self.frame_skip != 0:
                         time.sleep(0.001)
@@ -260,7 +250,6 @@ class SunClickerBot:
                             cv2.putText(frame_bgr, "PAUSED", (50, 50), 
                                       cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2)
                     else:
-                        # OPTIMIZATION: Downscale frame for faster processing
                         if self.downscale_factor != 1.0:
                             frame_gray = cv2.cvtColor(frame_bgr, cv2.COLOR_BGR2GRAY)
                             frame_gray = cv2.resize(frame_gray, None, 
@@ -270,19 +259,16 @@ class SunClickerBot:
                         else:
                             frame_gray = cv2.cvtColor(frame_bgr, cv2.COLOR_BGR2GRAY)
                         
-                        # OPTIMIZATION: Apply ROI if configured
                         if self.use_roi and self.roi:
                             x, y, w, h = self.roi
                             frame_gray = frame_gray[y:y+h, x:x+w]
                         
-                        # OPTIMIZATION: Sort templates by priority (success rate)
                         sorted_templates = sorted(self.templates, 
                                                 key=lambda t: self.template_priorities.get(t['name'], 0), 
                                                 reverse=True)
                         
                         best_matches = []
-                        
-                        # OPTIMIZATION: Parallel or sequential processing
+
                         if self.use_parallel and len(sorted_templates) > 2:
                             # Parallel processing for multiple templates
                             futures = []
@@ -298,7 +284,6 @@ class SunClickerBot:
                                 result = future.result()
                                 if result['found']:
                                     best_matches.append(result)
-                                    # OPTIMIZATION: Early exit after first match
                                     if self.early_exit:
                                         break
                         else:
@@ -307,7 +292,6 @@ class SunClickerBot:
                                 result = self.match_template_worker(frame_gray, template_info)
                                 if result['found']:
                                     best_matches.append(result)
-                                    # OPTIMIZATION: Early exit after first match
                                     if self.early_exit:
                                         break
                         
@@ -320,7 +304,6 @@ class SunClickerBot:
                             if current_time - self.last_click_time < self.click_cooldown:
                                 break
                             
-                            # OPTIMIZATION: Scale coordinates back to original size
                             scale_factor = 1.0 / self.downscale_factor
                             center_x = int((match['location'][0] + match['width'] // 2) * scale_factor)
                             center_y = int((match['location'][1] + match['height'] // 2) * scale_factor)
@@ -341,7 +324,6 @@ class SunClickerBot:
                             self.clicks_counter += 1
                             self.detections_by_template[match['template']] += 1
                             
-                            # OPTIMIZATION: Update template priority based on success
                             self.template_priorities[match['template']] = self.template_priorities.get(match['template'], 0) + 1
                             
                             # Record click
@@ -350,7 +332,6 @@ class SunClickerBot:
                             
                             print(f"Clicked sun at ({abs_x}, {abs_y}) - {match['template']} - conf: {match['confidence']:.3f}")
                             
-                            # Visualization
                             if not headless_mode:
                                 box_x = int(match['location'][0] * scale_factor)
                                 box_y = int(match['location'][1] * scale_factor)
@@ -369,7 +350,6 @@ class SunClickerBot:
                             
                             time.sleep(0.02)
 
-                    # Calculate FPS
                     frame_time = time.time() - frame_start
                     self.fps_counter.append(frame_time)
                     
@@ -387,7 +367,6 @@ class SunClickerBot:
                             self.running = False
                             break
                     
-                    # Small delay
                     time.sleep(0.001)
                     
             finally:

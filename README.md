@@ -28,7 +28,7 @@ A Python-based autoclicker for Plants vs. Zombies that automatically detects and
 2.  Run the script:
 
     ```bash
-    python sunClicker.py
+    python sun_clicker_gui.py
     ```
 
 3.  **Controls**:
